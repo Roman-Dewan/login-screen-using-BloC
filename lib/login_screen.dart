@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_responsive_login_ui/bloc/auth_bloc.dart';
+import 'package:flutter_responsive_login_ui/home_screen.dart';
 import 'package:flutter_responsive_login_ui/widgets/gradient_button.dart';
 import 'package:flutter_responsive_login_ui/widgets/login_field.dart';
 import 'package:flutter_responsive_login_ui/widgets/social_button.dart';
@@ -22,68 +23,84 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if(state is AuthFailure){
+          if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
             );
           }
+          if (state is AuthSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.uid)),
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
         },
-        child: SingleChildScrollView(
-          child: Center(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Image.asset('assets/images/signin_balls.png'),
-                  const Text(
-                    'Sign in.',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 50,
-                    ),
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return const Center(child: CircularProgressIndicator(color: Colors.red,));
+            }
+            return SingleChildScrollView(
+              child: Center(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Image.asset('assets/images/signin_balls.png'),
+                      const Text(
+                        'Sign in.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 50,
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+                      const SocialButton(
+                          iconPath: 'assets/svgs/g_logo.svg',
+                          label: 'Continue with Google'),
+                      const SizedBox(height: 20),
+                      const SocialButton(
+                        iconPath: 'assets/svgs/f_logo.svg',
+                        label: 'Continue with Facebook',
+                        horizontalPadding: 90,
+                      ),
+                      const SizedBox(height: 15),
+                      const Text(
+                        'or',
+                        style: TextStyle(
+                          fontSize: 17,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      LoginField(
+                        hintText: 'Email',
+                        controller: emailController,
+                      ),
+                      const SizedBox(height: 15),
+                      LoginField(
+                        hintText: 'Password',
+                        controller: passwordController,
+                      ),
+                      const SizedBox(height: 20),
+                      GradientButton(
+                        onPressed: () {
+                          context.read<AuthBloc>().add(
+                                AuthLoginRequested(
+                                  email: emailController.text.trimLeft(),
+                                  password: passwordController.text.trim(),
+                                ),
+                              );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 50),
-                  const SocialButton(
-                      iconPath: 'assets/svgs/g_logo.svg',
-                      label: 'Continue with Google'),
-                  const SizedBox(height: 20),
-                  const SocialButton(
-                    iconPath: 'assets/svgs/f_logo.svg',
-                    label: 'Continue with Facebook',
-                    horizontalPadding: 90,
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    'or',
-                    style: TextStyle(
-                      fontSize: 17,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  LoginField(
-                    hintText: 'Email',
-                    controller: emailController,
-                  ),
-                  const SizedBox(height: 15),
-                  LoginField(
-                    hintText: 'Password',
-                    controller: passwordController,
-                  ),
-                  const SizedBox(height: 20),
-                  GradientButton(
-                    onPressed: () {
-                      context.read<AuthBloc>().add(
-                            AuthLoginRequested(
-                              email: emailController.text.trimLeft(),
-                              password: passwordController.text.trim(),
-                            ),
-                          );
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
