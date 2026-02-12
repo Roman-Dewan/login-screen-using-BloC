@@ -23,8 +23,8 @@ class HomeScreen extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            if (state is AuthLoading) {
-              const Center(child: CircularProgressIndicator());
+            if(state is AuthLoading) {
+              return const Center(child: CircularProgressIndicator(color: Colors.red));
             }
             return Center(
                 child: Column(
