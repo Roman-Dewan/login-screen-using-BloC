@@ -11,7 +11,6 @@ final class AuthSuccess extends AuthState {
   final String uid;
 
   AuthSuccess({required this.uid});
-
 }
 
 final class AuthFailure extends AuthState {
